@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Platform Asset Management Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #0078d4;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            color: #0078d4;
+            margin-top: 40px;
+            border-left: 4px solid #0078d4;
+            padding-left: 10px;
+        }
+        
+        h3 {
+            color: #0078d4;
+            margin-top: 25px;
+        }
+        
+        .phase {
+            background-color: #f3f2f1;
+            padding: 10px 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .step {
+            background-color: #fff;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 3px solid #0078d4;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .step-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .step-content {
+            padding-left: 30px;
+        }
+        
+        ol {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        li.task {
+            list-style-type: none;
+            padding-left: 30px;
+            margin-bottom: 10px;
+        }
+        
+        .task input {
+            position: absolute;
+            left: 0;
+            top: 3px;
+            width: 20px;
+            height: 20px;
+        }
+        
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+        }
+        
+        .code-block {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            margin: 15px 0;
+        }
+        
+        .save-progress {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .save-progress:hover {
+            background-color: #106ebe;
+        }
+        
+        .progress-counter {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .screenshot-container {
+            margin: 15px 0;
+            border: 1px dashed #ccc;
+            padding: 10px;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        
+        .screenshot-placeholder {
+            display: block;
+            background-color: #eee;
+            color: #666;
+            padding: 30px;
+            margin: 10px auto;
+            max-width: 90%;
+            border-radius: 5px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+            font-style: italic;
+        }
+        
+        .screenshot img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .caption {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .step-content {
+                padding-left: 10px;
+            }
+            
+            li.task {
+                padding-left: 25px;
+            }
+        }
+
+        .collapse-button {
+            background: none;
+            border: none;
+            color: #0078d4;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: normal;
+        }
+
+        .collapsed .step-content {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Asset Management System in Power Platform: Step-by-Step Guide</h1>
+    <p>This guide will walk you through creating a complete asset management system using Microsoft Power Platform. Follow each step sequentially and check the boxes as you complete them.</p>
+    
+    <div class="progress-counter">
+        Completed: <span id="completed-count">0</span> / <span id="total-count">0</span>
+    </div>
+    
+    <button class="save-progress" id="save-progress">Save Progress</button>
+    <button class="save-progress" id="reset-progress" style="background-color: #d83b01; margin-left: 10px;" onclick="resetProgress()">Reset Progress</button>
+    
+    <script>
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                localStorage.removeItem('assetManagementTasks');
+                location.reload();
+            }
+        }
+    </script>
+    
+    <div class="phase">
+        <h2 id="phase1">Phase 1: Setting Up the Foundation</h2>
+        
+        <div class="step">
+            <div class="step-title">
+                Step 1: Create a Dataverse Environment
+                <button class="collapse-button" onclick="toggleCollapse(this)">Collapse</button>
+            </div>
+            <div class="step-content">
+                <ol>
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task1">
+                        <label for="task1">Go to Power Apps portal:
+                            <ul>
+                                <li>Open your web browser</li>
+                                <li>Type https://make.powerapps.com in the address bar</li>
+                                <li>Press Enter</li>
+                                <li>Wait for the page to load completely</li>
+                            </ul>
+                        </label>
+                        
+                        <div class="screenshot-container">
+                            <div class="screenshot-placeholder">
+                                Screenshot: Power Apps portal landing page showing the main dashboard and navigation menu
+                            </div>
+                            <p class="caption">Fig 1.1: Power Apps portal landing page</p>
+                        </div>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task2">
+                        <label for="task2">Sign in with your work account:
+                            <ul>
+                                <li>Click on the "Sign in" button if not already signed in</li>
+                                <li>Enter your work email address</li>
+                                <li>Click "Next"</li>
+                                <li>Enter your password</li>
+                                <li>Click "Sign in"</li>
+                                <li>Complete any multi-factor authentication if required</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task3">
+                        <label for="task3">Create a new environment:
+                            <ul>
+                                <li>Look at the top-right corner of the screen</li>
+                                <li>Click on the environment selector dropdown</li>
+                                <li>Click on "Environments" in the dropdown menu</li>
+                            </ul>
+                        </label>
+                        
+                        <div class="screenshot-container">
+                            <div class="screenshot-placeholder">
+                                Screenshot: Environment selector dropdown in the top-right corner of Power Apps portal showing the "Environments" option
+                            </div>
+                            <p class="caption">Fig 1.2: Environment selector dropdown</p>
+                        </div>
+                        
+                        <ul>
+                            <li>Look for the "+ New environment" button</li>
+                            <li>Click the "+ New environment" button</li>
+                        </ul>
+                        
+                        <div class="screenshot-container">
+                            <div class="screenshot-placeholder">
+                                Screenshot: Environments page showing the list of existing environments and the "+ New environment" button highlighted
+                            </div>
+                            <p class="caption">Fig 1.3: Environments page with New environment button</p>
+                        </div>
+                        
+                        <ul>
+                            <li>In the "Name" field, type "Asset Management"</li>
+                            <li>In the "Type" dropdown, select "Production"</li>
+                            <li>In the "Region" dropdown, select your closest geographic region</li>
+                            <li>Under "Purpose," type "Asset tracking and inventory management"</li>
+                            <li>Click the "Next" button</li>
+                        </ul>
+                        
+                        <div class="screenshot-container">
+                            <div class="screenshot-placeholder">
+                                Screenshot: New environment creation form filled out with "Asset Management" as the name, "Production" as the type, and a selected region
+                            </div>
+                            <p class="caption">Fig 1.4: New environment creation form</p>
+                        </div>
+                        
+                        <ul>
+                            <li>On the "Add database" screen, turn on the toggle for "Create a database"</li>
+                            <li>Select "USD" or your local currency from the "Currency" dropdown</li>
+                            <li>Select your preferred language from the "Language" dropdown</li>
+                            <li>Click the "Save" button</li>
+                            <li>Wait for the environment to be created (this may take several minutes)</li>
+                        </ul>
+                        
+                        <div class="screenshot-container">
+                            <div class="screenshot-placeholder">
+                                Screenshot: Add database screen with the "Create a database" toggle turned on, and currency/language options selected
+                            </div>
+                            <p class="caption">Fig 1.5: Database configuration for new environment</p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-title">
+                Step 2: Create Dataverse Tables
+                <button class="collapse-button" onclick="toggleCollapse(this)">Collapse</button>
+            </div>
+            <div class="step-content">
+                <h3>Creating the Asset Table</h3>
+                <ol>
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task4">
+                        <label for="task4">Access the table creation interface:
+                            <ul>
+                                <li>Ensure you're in your "Asset Management" environment (check top-right corner)</li>
+                                <li>Look at the left navigation panel</li>
+                                <li>Click on "Tables"</li>
+                                <li>Click the "+ New table" button at the top of the screen</li>
+                            </ul>
+                        </label>
+                        
+                        <div class="screenshot-container">
+                            <div class="screenshot-placeholder">
+                                Screenshot: Tables section in Power Apps showing the list of existing tables (if any) and the "+ New table" button highlighted in the top command bar
+                            </div>
+                            <p class="caption">Fig 2.1: Tables section with New table button</p>
+                        </div>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task5">
+                        <label for="task5">Configure the Asset table basic settings:
+                            <ul>
+                                <li>In the "Display name" field, type "Asset"</li>
+                                <li>The "Plural name" field should automatically populate with "Assets"</li>
+                                <li>Leave the "Name" field with the auto-generated value</li>
+                                <li>Leave the "Primary field" as "Name"</li>
+                                <li>Toggle on "Enable attachments" to allow file attachments</li>
+                                <li>Keep "Track changes for this table" toggled on</li>
+                                <li>Click "Next"</li>
+                            </ul>
+                        </label>
+                        
+                        <div class="screenshot-container">
+                            <div class="screenshot-placeholder">
+                                Screenshot: New table creation form filled with "Asset" as the display name, with "Plural name" automatically populated as "Assets", and other default settings
+                            </div>
+                            <p class="caption">Fig 2.2: New Asset table basic configuration</p>
+                        </div>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task6">
+                        <label for="task6">Configure standard columns:
+                            <ul>
+                                <li>A "Name" column is created by default (this will be for Asset Tag)</li>
+                                <li>Click on the "Name" column</li>
+                                <li>Change the "Display name" to "Asset Tag"</li>
+                                <li>For "Required," select "Business required"</li>
+                                <li>For "Maximum length," enter "50"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                        
+                        <div class="screenshot-container">
+                            <div class="screenshot-placeholder">
+                                Screenshot: Column properties pane showing the configuration for the primary column with display name changed to "Asset Tag", "Business required" selected, and maximum length set to 50
+                            </div>
+                            <p class="caption">Fig 2.3: Configuring the Asset Tag primary column</p>
+                        </div>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task7">
+                        <label for="task7">Add Serial Number column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Serial Number"</li>
+                                <li>Keep "Text" as the data type</li>
+                                <li>For "Required," select "Optional"</li>
+                                <li>For "Maximum length," enter "100"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                        
+                        <div class="screenshot-container">
+                            <div class="screenshot-placeholder">
+                                Screenshot: Add column interface showing the form for creating a Serial Number column with text data type and optional setting
+                            </div>
+                            <p class="caption">Fig 2.4: Adding the Serial Number column</p>
+                        </div>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task8">
+                        <label for="task8">Add Model column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Model"</li>
+                                <li>Keep "Text" as the data type</li>
+                                <li>For "Required," select "Optional"</li>
+                                <li>For "Maximum length," enter "100"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task9">
+                        <label for="task9">Add Category column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Category"</li>
+                                <li>For "Data type," select "Choice"</li>
+                                <li>For "Required," select "Business required"</li>
+                                <li>Under "Choices," click "+ New choice"</li>
+                                <li>Add each choice one at a time:
+                                    <ul>
+                                        <li>Type "Laptop" and click "Add"</li>
+                                        <li>Type "Desktop" and click "Add"</li>
+                                        <li>Type "Monitor" and click "Add"</li>
+                                        <li>Type "Peripheral" and click "Add"</li>
+                                        <li>Type "Mobile Device" and click "Add"</li>
+                                        <li>Type "Other" and click "Add"</li>
+                                    </ul>
+                                </li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                        
+                        <div class="screenshot-container">
+                            <div class="screenshot-placeholder">
+                                Screenshot: Choice column creation interface showing the Category column with multiple choices (Laptop, Desktop, Monitor, etc.) added to the list
+                            </div>
+                            <p class="caption">Fig 2.5: Creating the Category choice column with predefined values</p>
+                        </div>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task10">
+                        <label for="task10">Add Status column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Status"</li>
+                                <li>For "Data type," select "Choice"</li>
+                                <li>For "Required," select "Business required"</li>
+                                <li>Under "Choices," click "+ New choice"</li>
+                                <li>Add each choice one at a time:
+                                    <ul>
+                                        <li>Type "Available" and click "Add"</li>
+                                        <li>Type "Assigned" and click "Add"</li>
+                                        <li>Type "In Repair" and click "Add"</li>
+                                        <li>Type "Disposed" and click "Add"</li>
+                                    </ul>
+                                </li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task11">
+                        <label for="task11">Add Acquisition Date column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Acquisition Date"</li>
+                                <li>For "Data type," select "Date Only"</li>
+                                <li>For "Required," select "Optional"</li>
+                                <li>For "Format," select "Date Only"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task12">
+                        <label for="task12">Add Last Count Date column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Last Count Date"</li>
+                                <li>For "Data type," select "Date Only"</li>
+                                <li>For "Required," select "Optional"</li>
+                                <li>For "Format," select "Date Only"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task13">
+                        <label for="task13">Add Current Count column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Current Count"</li>
+                                <li>For "Data type," select "Whole Number"</li>
+                                <li>For "Required," select "Business required"</li>
+                                <li>For "Minimum value," enter "0"</li>
+                                <li>For "Maximum value," leave blank</li>
+                                <li>Set "Default value" to "0"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task14">
+                        <label for="task14">Add Threshold Level column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Threshold Level"</li>
+                                <li>For "Data type," select "Whole Number"</li>
+                                <li>For "Required," select "Business required"</li>
+                                <li>For "Minimum value," enter "0"</li>
+                                <li>For "Maximum value," leave blank</li>
+                                <li>Set "Default value" to "10"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task15">
+                        <label for="task15">Add Notes column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Notes"</li>
+                                <li>For "Data type," select "Multiline Text"</li>
+                                <li>For "Required," select "Optional"</li>
+                                <li>For "Format," select "Text"</li>
+                                <li>For "Maximum length," enter "2000"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task16">
+                        <label for="task16">Save the Asset table:
+                            <ul>
+                                <li>Click the "Create" button at the bottom of the screen</li>
+                                <li>Wait for the table creation process to complete</li>
+                            </ul>
+                        </label>
+                        
+                        <div class="screenshot-container">
+                            <div class="screenshot-placeholder">
+                                Screenshot: Completed Asset table creation form showing all configured columns, with the Create button highlighted
+                            </div>
+                            <p class="caption">Fig 2.6: Completed Asset table configuration ready to be created</p>
+                        </div>
+                        
+                        <div class="screenshot-container">
+                            <div class="screenshot-placeholder">
+                                Screenshot: Tables list view showing the newly created Asset table in the list of tables
+                            </div>
+                            <p class="caption">Fig 2.7: Tables list with the new Asset table created</p>
+                        </div>
+                    </li>
+                </ol>
+                
+                <h3>Creating the Location Table</h3>
+                <ol>
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task17">
+                        <label for="task17">Access the table creation interface:
+                            <ul>
+                                <li>Click on "Tables" in the left navigation</li>
+                                <li>Click the "+ New table" button at the top of the screen</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task18">
+                        <label for="task18">Configure the Location table basic settings:
+                            <ul>
+                                <li>In the "Display name" field, type "Location"</li>
+                                <li>The "Plural name" field should automatically populate with "Locations"</li>
+                                <li>Leave the "Name" field with the auto-generated value</li>
+                                <li>Leave the "Primary field" as "Name"</li>
+                                <li>Click "Next"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task19">
+                        <label for="task19">Configure standard columns:
+                            <ul>
+                                <li>Keep the default "Name" column as is</li>
+                                <li>For "Required," select "Business required"</li>
+                                <li>For "Maximum length," enter "100"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task20">
+                        <label for="task20">Add Building column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Building"</li>
+                                <li>Keep "Text" as the data type</li>
+                                <li>For "Required," select "Optional"</li>
+                                <li>For "Maximum length," enter "100"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task21">
+                        <label for="task21">Add Floor column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Floor"</li>
+                                <li>Keep "Text" as the data type</li>
+                                <li>For "Required," select "Optional"</li>
+                                <li>For "Maximum length," enter "50"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task22">
+                        <label for="task22">Add Room column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Room"</li>
+                                <li>Keep "Text" as the data type</li>
+                                <li>For "Required," select "Optional"</li>
+                                <li>For "Maximum length," enter "50"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task23">
+                        <label for="task23">Add Notes column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Notes"</li>
+                                <li>For "Data type," select "Multiline Text"</li>
+                                <li>For "Required," select "Optional"</li>
+                                <li>For "Format," select "Text"</li>
+                                <li>For "Maximum length," enter "2000"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task24">
+                        <label for="task24">Save the Location table:
+                            <ul>
+                                <li>Click the "Create" button at the bottom of the screen</li>
+                                <li>Wait for the table creation process to complete</li>
+                            </ul>
+                        </label>
+                    </li>
+                </ol>
+                
+                <h3>Creating the Transaction Table</h3>
+                <ol>
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task25">
+                        <label for="task25">Access the table creation interface:
+                            <ul>
+                                <li>Click on "Tables" in the left navigation</li>
+                                <li>Click the "+ New table" button at the top of the screen</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task26">
+                        <label for="task26">Configure the Transaction table basic settings:
+                            <ul>
+                                <li>In the "Display name" field, type "Asset Transaction"</li>
+                                <li>The "Plural name" field should automatically populate with "Asset Transactions"</li>
+                                <li>Leave the "Name" field with the auto-generated value</li>
+                                <li>For "Primary field," select "Auto Number" from the dropdown</li>
+                                <li>In the "Display name" field for the primary field, type "Transaction ID"</li>
+                                <li>Click "Next"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task27">
+                        <label for="task27">Add Asset Reference column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Asset"</li>
+                                <li>For "Data type," select "Lookup"</li>
+                                <li>In the "Related table" dropdown, select "Asset"</li>
+                                <li>For "Required," select "Business required"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task28">
+                        <label for="task28">Add Transaction Type column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Transaction Type"</li>
+                                <li>For "Data type," select "Choice"</li>
+                                <li>For "Required," select "Business required"</li>
+                                <li>Under "Choices," click "+ New choice"</li>
+                                <li>Add each choice one at a time:
+                                    <ul>
+                                        <li>Type "Check In" and click "Add"</li>
+                                        <li>Type "Check Out" and click "Add"</li>
+                                        <li>Type "Inventory Count" and click "Add"</li>
+                                    </ul>
+                                </li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task29">
+                        <label for="task29">Add Quantity column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Quantity"</li>
+                                <li>For "Data type," select "Whole Number"</li>
+                                <li>For "Required," select "Business required"</li>
+                                <li>For "Minimum value," enter "1"</li>
+                                <li>Set "Default value" to "1"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task30">
+                        <label for="task30">Add From Location column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "From Location"</li>
+                                <li>For "Data type," select "Lookup"</li>
+                                <li>In the "Related table" dropdown, select "Location"</li>
+                                <li>For "Required," select "Optional"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task31">
+                        <label for="task31">Add To Location column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "To Location"</li>
+                                <li>For "Data type," select "Lookup"</li>
+                                <li>In the "Related table" dropdown, select "Location"</li>
+                                <li>For "Required," select "Optional"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task32">
+                        <label for="task32">Add Performed By column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Performed By"</li>
+                                <li>For "Data type," select "User"</li>
+                                <li>For "Required," select "Business required"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task33">
+                        <label for="task33">Add Transaction Date column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Transaction Date"</li>
+                                <li>For "Data type," select "Date and Time"</li>
+                                <li>For "Required," select "Business required"</li>
+                                <li>For "Format," select "Date and Time"</li>
+                                <li>For "Behavior," select "User Local"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task34">
+                        <label for="task34">Add Notes column:
+                            <ul>
+                                <li>Click the "+ Add column" button</li>
+                                <li>In the "Display name" field, type "Notes"</li>
+                                <li>For "Data type," select "Multiline Text"</li>
+                                <li>For "Required," select "Optional"</li>
+                                <li>For "Format," select "Text"</li>
+                                <li>For "Maximum length," enter "2000"</li>
+                                <li>Click "Done"</li>
+                            </ul>
+                        </label>
+                    </li>
+                    
+                    <li class="task">
+                        <input type="checkbox" class="task-checkbox" id="task35">
+                        <label for="task35">Save the Transaction table:
+                            <ul>
+                                <li>Click the "Create" button at the bottom of the screen</li>
+                                <li>Wait for the table creation process to complete</li>
+                            </ul>
+                        </label>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <div class="phase">
+        <h2 id="phase2">Phase 
