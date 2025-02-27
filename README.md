@@ -24,3 +24,8 @@ Follow these steps to host your project using GitHub Pages:
 
 ## Access Your Hosted Page  
 Once GitHub Pages is enabled, your site will be available at:  
+
+https://your-github-username.github.io/your-repository-name/
+
+
+Happy hosting! 🚀
